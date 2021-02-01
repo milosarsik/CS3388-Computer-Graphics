@@ -10,6 +10,10 @@ class matrix:
     def set(self,r,c,a):
         self.__m[r][c] = a
 
+    # TEST
+    def getArray(self):
+        return self.__m
+
     def get(self,r,c):
         return self.__m[r][c]
 

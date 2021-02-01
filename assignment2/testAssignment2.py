@@ -4,12 +4,12 @@ from point import point
 from transform import transform
 from graphicsWindow import graphicsWindow
 from cameraMatrix import cameraMatrix
-#from parametricPlane import parametricPlane
-#from parametricCircle import parametricCircle
+from parametricPlane import parametricPlane
+from parametricCircle import parametricCircle
 from parametricSphere import parametricSphere
 from parametricTorus import parametricTorus
-#from parametricCone import parametricCone
-#from parametricCylinder import parametricCylinder
+from parametricCone import parametricCone
+from parametricCylinder import parametricCylinder
 from wireMesh import wireMesh
 
 NP = 10.0 #Near plane
