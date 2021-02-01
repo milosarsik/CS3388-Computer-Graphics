@@ -13,7 +13,7 @@ class parametricCylinder(parametricObject):
     def getPoint(self,u,v):
         P = matrix(np.ones((4,1)))
         P.set(0,0,self.__radius*cos(v))
-        P.set(1,0,self.__height*sin(v))
+        P.set(1,0,self.__radius*sin(v))
         P.set(2,0,self.__height*u)
         return P
     
