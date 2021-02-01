@@ -3,6 +3,11 @@ from matrix import matrix
 
 #This code shows how to effectively use the matrix class
 
+#TEST
+m1010 = matrix(np.zeros((0,0)))
+print(m1010)
+m1010.insertRow(1,1,1,1)
+
 #Creating a 2 by 4 matrix with elements initialized to 0
 m1 = matrix(np.zeros((2,4)))
 print(m1)
@@ -42,8 +47,11 @@ else:
 #Computing the dot product of two row vectors as a matrix multiplication
 m1 = matrix(np.zeros((3,1)))
 #Using the set method to initialize vectors
-m1.set(0,0,1.0)
-m1.set(1,0,0.0)
+print("Using the set method to initialize vectors")
+print(m1)
+m1.set(0,0,2.0)
+m1.set(1,0,2.0)
+print(m1)
 
 m2 = matrix(np.zeros((3,1)))
 m2.set(0,0,0.0)
@@ -87,6 +95,7 @@ print(m1)
 print(m1.determinant())
 
 #Adding and deleting matrix rows and columns
+print("Adding and deleting matrix rows and columns")
 m1 = matrix(np.zeros((4,4)))
 m1.set(0,0,1.0)
 m1.set(1,0,2.0)
