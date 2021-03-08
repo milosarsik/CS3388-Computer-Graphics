@@ -1,9 +1,31 @@
+"""tessel Class
+
+This is a python class that will draw the entire image using the objects, camera position and light source 
+The tessel class has 3 attributes:
+    - Object List: A list of objects, each having there own position, color, and reflectance
+    - Camera: This is the camera object that has the information on how to view the objects with depth and position
+    - Light: This will be an object of the light source class that will store the position, color and light 
+        intensity of the light source
+"""
+
 import numpy as np
 from matrix import matrix
 
 class tessel:
 
     def __init__(self,objectList,camera,light):
+        """This will initialize a practical lighting model using the passed in objects
+            objectList, camera and light source
+
+        Args:
+            objectList: A list of objects such as a cone, torus, cylinder, etc.
+            camera: A camera matrix that has the information on how we view every object in the scene
+            light: A light source object that stores the position, color and intensity of the light
+
+        Returns:
+            None
+        """
+
         EPSILON = 0.001
         
         #Create an empty list of faces. This is an instance variable for this class
@@ -13,21 +35,21 @@ class tessel:
         facePoints = []
         
         #Transform the position of the light into viewing coordinates (use method worldToViewingCoordinates from class cameraMatrix)
-        Lv = camera.worldToViewingCoordinates(light.getPosition())
+        lightViewingCoordinates = camera.worldToViewingCoordinates(light.getPosition())
 
 	    #Get light intensity values
-        Li = light.getIntensity() #Obtain light intensity
+        lightIntensity = light.getIntensity() #Obtain light intensity
         
         #For each object in objectList:
         for object in objectList:
             #Get the object color
-            c = object.getColor() #Obtain object color
-	        
+            color = object.getColor()
+
             #u becomes the start value of the u-parameter range for the object
             u = object.getURange()[0]
 	        
             #While u + the delta u of the object is smaller than the final value of the u-parameter range + EPSILON:
-            while u + object.getUVDelta()[0] < object.getURange()[1]  + EPSILON:
+            while u + object.getUVDelta()[0] < object.getURange()[1] + EPSILON:
         		#v become the start value of the v-parameter range for the object
                 v = object.getVRange()[0]
         		
@@ -48,30 +70,30 @@ class tessel:
 		                #If this minimum Z-value is not greater than -(Near Plane) (so the face is not behind the near plane):                    
                     if not self.__minCoordinate(facePoints,2) > -camera.getNp():
             			#Compute the centroid point of the face points
-                        C = self.__centroid(facePoints) #Find centroid point of face
+                        centroid = self.__centroid(facePoints) #Find centroid point of face
 			            
                         #Compute the normal vector of the face, normalized
-                        N = self.__vectorNormal(facePoints) #Find normal vector to face
+                        normal = self.__vectorNormal(facePoints) #Find normal vector to face
 
 	            		#Compute face shading, excluding back faces (normal vector pointing away from camera) in the following way:
-                        if not self.__backFace(C,N):
+                        if not self.__backFace(centroid,normal):
 	            		    #S is the vector from face centroid to light source, normalized
-                            S = self.__vectorToLightSource(Lv,C)  # Find vector from centroid to light source
+                            S = self.__vectorToLightSource(lightViewingCoordinates,centroid)  # Find vector from centroid to light source
             			    
                             #R is the vector of specular reflection
-                            R = self.__vectorSpecular(S,N)  # Find specular reflection vector
+                            R = self.__vectorSpecular(S,normal)  # Find specular reflection vector
             
 			                #V is the vector from the face centroid to the origin of viewing coordinates
-                            V = self.__vectorToEye(C)  # Find vector from origin of viewing coordinates to surface centroid
+                            V = self.__vectorToEye(centroid)  # Find vector from origin of viewing coordinates to surface centroid
                             
                             # Compute color index
-                            index = self.__colorIndex(object,N,S,R,V)
+                            index = self.__colorIndex(object,normal,S,R,V)
                             
                             #Obtain face color (in the RGB 3-color channels, integer values) as a tuple:
 			                    #(object color (red channel) * light intensity (red channel) * index,
 			                    # object color (green channel) * light intensity (green channel) * index,
 			                    # object color (blue channel) * light intensity (blue channel) * index)
-                            faceColor = (int(c[0]*Li[0]*index),int(c[1]*Li[1]*index),int(c[2]*Li[2]*index))
+                            faceColor = (int(color[0]*lightIntensity[0]*index),int(color[1]*lightIntensity[1]*index),int(color[2]*lightIntensity[2]*index))
                             
                             #Transform 3D points expressed in viewing coordinates into 2D pixel coordinates
                             pixelFacePoints = []
@@ -83,7 +105,7 @@ class tessel:
                             
                             #Add all face attributes to the list of faces in the following manner:
 				                #append pixel Z-coordinate of face centroid, the pixel face point list, and the face color                            
-                            self.__faceList.append((camera.viewingToPixelCoordinates(C).get(2,0),pixelFacePoints,faceColor))
+                            self.__faceList.append((camera.viewingToPixelCoordinates(centroid).get(2,0),pixelFacePoints,faceColor))
                     
                     #Re-initialize the list of face points to empty
                     facePoints = []
