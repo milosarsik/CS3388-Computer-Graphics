@@ -105,12 +105,30 @@ class cameraMatrix:
         c = self.__npHeight*(2.0*(window.getHeight() - (j+1))/window.getHeight() - 1.0)
         return (self.__N.scalarMultiply(a) + self.__U.scalarMultiply(b) + self.__V.scalarMultiply(c)).insertRow(3,0.0)
 
+# Direction is the vector describing the direction of the ray
+    # objectList is a list of objects composing the scene
     def minimumIntersection(self,direction,objectList):
+        # create empty intersection list
         intersectionList = []
-        for k, object in enumerate(objectList):
-            t0 = object.intersection(object.getTinv()*self.getE(),object.getTinv()*direction)  #Find the intersection t-values with object
-            if t0 != -1.0: intersectionList.append((k,t0))
-        return sorted(intersectionList,key=operator.itemgetter(1))  #Sort list in ascending order of t-values
+        # for each object k in the list
+        for k in objectList:
+            # inverse of matrix T associated with object
+            matrixInverse = k.getTinv()
+            # transform the ray with M-inverse in the following way: Te = M-inverse*e, where e is the position of the camera
+            # and Td = M-inverse*d, where d is the direction of the ray
+            Te = matrixInverse * self.__E
+            Td = matrixInverse * direction
+            # t0 = object.intersection(Te,Td)
+            t0 = k.intersection(Te,Td)
+            # if t0 != -1.0 then add tuple (K,t0) to intersection list
+            if t0 != -1.0:
+                intersectionList.append((k,t0))
+        # sort intersection list in increasing oder of t0
+        intersectionList.sort(key = lambda tup:tup[1])
+        # returns a list of tuples (k,t0) where k is the position in the list of an object that the ray intersects
+        # t0 is the minimum t-value of the intersection the ray makes with the object
+        # This list is sorted in increasing order of the t-values
+        return intersectionList99
 
     def worldToViewingCoordinates(self,P):
         return self.__Mv*P
